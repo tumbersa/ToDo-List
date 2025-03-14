@@ -23,10 +23,12 @@ extension TasksPresenter: TasksInteractorOutput {
     func viewLoaded() {
 //        if !UserDefaults.standard.bool(forKey: Constants.firstSetup) {
 //            UserDefaults.standard.set(true, forKey: Constants.firstSetup)
-            interactor?.fetchTasksList{ result in
+            interactor?.fetchTasksList{[weak self] result in
+                guard let self else { return }
                 switch result {
                     case let .success(entity):
-                        self.tasksList = entity.todos
+                        tasksList = entity.todos
+                        view?.setupInitialState(tasksList)
                     case let .failure(error):
                         debugPrint(error)
                 }

@@ -6,7 +6,8 @@
 //
 
 import Foundation
+import UIKit
 
 final class TasksRouter: TasksRouterInput {
-    
+    weak var view: UIViewController?
 }

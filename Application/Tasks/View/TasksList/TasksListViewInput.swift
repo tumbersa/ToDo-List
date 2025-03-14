@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TasksListViewInput: AnyObject {
-    
+    func setupInitialState(_ tasksList: [TodoEntity])
 }

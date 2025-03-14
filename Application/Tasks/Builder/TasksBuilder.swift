@@ -14,13 +14,15 @@ enum TasksBuilder {
         let interactor = TasksInteractor(networkService: NetworkService())
         let prenter = TasksPresenter()
         let router = TasksRouter()
+        let navigationViewController = UINavigationController(rootViewController: viewController)
 
         viewController.output = prenter
         prenter.view = viewController
         prenter.router = router
+        router.view = navigationViewController
         prenter.interactor = interactor
         interactor.output = prenter
 
-        return viewController
+        return navigationViewController
     }
 }
