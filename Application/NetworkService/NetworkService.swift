@@ -16,10 +16,6 @@ final class NetworkService: INetworkService {
     private let urlSession = URLSession.shared
     private let decoder = JSONDecoder()
 
-    static let shared = NetworkService()
-
-    private init() {}
-
     func obtainTasksListResult(_ completion: @escaping (Result<TaskListEntity, Error>) -> ()) {
         guard let url = URL(string: Constants.baseUrl + "/todos") else {
             completion(.failure(NetworkError.invalidUrl))

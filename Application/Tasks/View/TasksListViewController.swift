@@ -9,10 +9,16 @@ import UIKit
 
 final class TasksListViewController: UIViewController {
 
+    var output: TasksInteractorOutput?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        output?.viewLoaded()
     }
 
 }
 
+extension TasksListViewController: TasksListViewInput {
+    
+}
