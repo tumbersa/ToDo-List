@@ -11,7 +11,7 @@ import UIKit
 enum TasksBuilder {
     static func build() -> UIViewController {
         let viewController = TasksListViewController()
-        let interactor = TasksInteractor(networkService: NetworkService())
+        let interactor = TasksInteractor(networkService: NetworkService(), todoStore: TodoStore())
         let prenter = TasksPresenter()
         let router = TasksRouter()
         let navigationViewController = UINavigationController(rootViewController: viewController)

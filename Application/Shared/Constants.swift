@@ -9,4 +9,6 @@ import Foundation
 
 enum Constants {
     static let baseUrl = "https://dummyjson.com"
+    static let firstSetup = "FirstSetup"
 }
+

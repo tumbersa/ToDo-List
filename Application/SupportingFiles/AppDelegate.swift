@@ -12,6 +12,18 @@ import CoreData
 final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+//        for entityName in persistentContainer.managedObjectModel.entities.compactMap({ $0.name }) {
+//            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+//            let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+//
+//            do {
+//                try persistentContainer.viewContext.execute(deleteRequest)
+//                try persistentContainer.viewContext.save()
+//            } catch let error as NSError {
+//                print("Ошибка при удалении объектов: \(error), \(error.userInfo)")
+//            }
+//        }
+//        UserDefaults.standard.set(false, forKey: Constants.firstSetup)
         return true
     }
 

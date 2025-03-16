@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TasksInteractorInput {
-    func fetchTasksList(_ completion: @escaping (Result<TaskListEntity, Error>) -> ())
+    func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ())
 }

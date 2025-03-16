@@ -7,25 +7,38 @@
 
 import Foundation
 
-final class TasksInteractor: TasksInteractorInput {
+final class TasksInteractor<Store: IStore>: TasksInteractorInput where Store.Entity == TodoEntity {
+
     private let networkService: INetworkService
+    private let todoStore: Store
 
     weak var output: TasksInteractorOutput?
 
-    init(networkService: INetworkService) {
+    init(networkService: INetworkService, todoStore: Store) {
         self.networkService = networkService
+        self.todoStore = todoStore
     }
 
-    func fetchTasksList(_ completion: @escaping (Result<TaskListEntity, Error>) -> ()) {
-        networkService.obtainTasksListResult { result in
-            DispatchQueue.main.async {
-                switch result {
-                    case let .success(entity):
-                        completion(.success(entity))
-                    case let .failure(error):
-                        completion(.failure(error))
+    func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ()) {
+        if !UserDefaults.standard.bool(forKey: Constants.firstSetup) {
+            UserDefaults.standard.set(true, forKey: Constants.firstSetup)
+            networkService.obtainTasksListResult { [weak self] result in
+                guard let self else { return }
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    switch result {
+                        case let .success(entity):
+                            for todoEntity in entity.todos {
+                                todoStore.addEntity(todoEntity)
+                            }
+                            completion(.success(todoStore.entities))
+                        case let .failure(error):
+                            completion(.failure(error))
+                    }
                 }
             }
+        } else {
+            completion(.success(todoStore.entities))
         }
     }
 }

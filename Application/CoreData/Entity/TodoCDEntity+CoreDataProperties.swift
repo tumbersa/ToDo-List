@@ -16,10 +16,10 @@ extension TodoCDEntity {
         return NSFetchRequest<TodoCDEntity>(entityName: "TodoCDEntity")
     }
 
+    @NSManaged public var id: String?
     @NSManaged public var title: String?
     @NSManaged public var note: String?
     @NSManaged public var date: Date?
-    @NSManaged public var id: String?
     @NSManaged public var completed: Bool
 
 }
