@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class TasksInteractor<Store: IStore>: TasksInteractorInput where Store.Entity == TodoEntity {
+final class TasksInteractor<Store: IStore> where Store.Entity == TodoEntity {
 
     private let networkService: INetworkService
     private let todoStore: Store
@@ -18,6 +18,10 @@ final class TasksInteractor<Store: IStore>: TasksInteractorInput where Store.Ent
         self.networkService = networkService
         self.todoStore = todoStore
     }
+
+}
+
+extension TasksInteractor: TasksInteractorInput {
 
     func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ()) {
         if !UserDefaults.standard.bool(forKey: Constants.firstSetup) {
@@ -41,4 +45,5 @@ final class TasksInteractor<Store: IStore>: TasksInteractorInput where Store.Ent
             completion(.success(todoStore.entities))
         }
     }
+
 }

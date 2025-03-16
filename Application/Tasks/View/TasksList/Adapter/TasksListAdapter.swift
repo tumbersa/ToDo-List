@@ -40,8 +40,11 @@ final class TasksListAdapter: NSObject {
         UITableViewDiffableDataSource<Section, TodoEntity>(
             tableView: tableView,
             cellProvider: { [weak self] tableView, indexPath, itemIdentifier in
-                let cell = UITableViewCell() // tableView.reuse(UITableViewCell.self, indexPath)
-                cell.textLabel?.text = itemIdentifier.title
+                let cell = tableView.reuse(TasksListTableViewCell.self, indexPath)
+                guard let self else { return cell }
+                let items = filteredItems.isEmpty ? items : filteredItems
+                let isLast = indexPath.row == items.count - 1
+                cell.confugure(with: itemIdentifier, isLast: isLast)
                 return cell
             })
     }()
@@ -51,7 +54,6 @@ final class TasksListAdapter: NSObject {
         self.tableView = tableView
         self.searchController = searchController
         super.init()
-        _ = dataSource
         setup()
     }
 
@@ -61,6 +63,10 @@ private extension TasksListAdapter {
 
     func setup() {
         tableView.delegate = self
+        tableView.separatorStyle = .none
+        tableView.register(TasksListTableViewCell.self)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = UITableView.automaticDimension
         searchController.searchResultsUpdater = self
     }
 
@@ -98,6 +104,12 @@ extension TasksListAdapter: UISearchResultsUpdating {
 }
 
 extension TasksListAdapter: UITableViewDelegate {
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let items = filteredItems.isEmpty ? items : filteredItems
+        // TODO: - update via Core Data
+        items[indexPath.row]
+    }
 
 }
 
