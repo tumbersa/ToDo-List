@@ -18,7 +18,22 @@ final class TasksListAdapter: NSObject {
     private let searchController: UISearchController
 
     private weak var output: TasksListAdapterOutput?
-    private var items: [TodoEntity] = []
+    private let concurrentQueue = DispatchQueue(label: "com.ToDo_List.tasksListConcurrentQueue", attributes: .concurrent)
+    private var searchSerialQueue = DispatchQueue(label: "com.ToDo_List.tasksListSearchSerialQueue")
+    private var _items: [TodoEntity] = []
+
+    private var items: [TodoEntity] {
+        get {
+            return concurrentQueue.sync {
+                _items
+            }
+        }
+        set {
+            concurrentQueue.async(flags: .barrier) {
+                self._items = newValue
+            }
+        }
+    }
     private var filteredItems: [TodoEntity] = []
 
     private lazy var dataSource: UITableViewDiffableDataSource<Section, TodoEntity> = {
@@ -67,8 +82,17 @@ extension TasksListAdapter: UISearchResultsUpdating {
             updateData(on: items)
             return
         }
-        self.filteredItems = items.filter{ $0.title.lowercased().contains(searchText.lowercased()) }
-        updateData(on: filteredItems)
+
+        searchSerialQueue.async { [weak self] in
+            guard let self = self else { return }
+            let filteredItems = self.items.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+
+            DispatchQueue.main.sync { [weak self] in
+                guard let self = self else { return }
+                self.filteredItems = filteredItems
+                self.updateData(on: filteredItems)
+            }
+        }
     }
 
 }
