@@ -20,6 +20,7 @@ final class TodoStore: IStore {
 
     private let context: NSManagedObjectContext
 
+    static let shared: TodoStore = TodoStore()
     var entities: [TodoEntity] {
         let request = TodoCDEntity.fetchRequest()
         let objects: [TodoCDEntity] = (try? context.fetch(request)) ?? []
@@ -38,7 +39,7 @@ final class TodoStore: IStore {
         return todo
     }
 
-    init() {
+    private init() {
         self.context = (UIApplication.shared.delegate as? AppDelegate)!.persistentContainer.viewContext
     }
 

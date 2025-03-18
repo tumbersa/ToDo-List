@@ -1,5 +1,5 @@
 //
-//  TasksPresenter.swift
+//  TasksListPresenter.swift
 //  ToDo List
 //
 //  Created by Глеб Капустин on 14.03.2025.
@@ -7,14 +7,15 @@
 
 import Foundation
 
-final class TasksPresenter {
+final class TasksListPresenter {
 
     private var tasksList: [TodoEntity] = []
 
     weak var view: TasksListViewInput?
-    var interactor: TasksInteractorInput?
-    var router: TasksRouterInput?
+    var interactor: TasksListInteractorInput?
+    var router: TasksListRouterInput?
     var didSelectCell: ((TodoEntity) -> ())?
+    var onCreateButtonTapped: (() -> ())?
 
     init() {
         didSelectCell = { [weak self] entity in
@@ -31,10 +32,15 @@ final class TasksPresenter {
             let updatedItems = interactor?.getTasksList()
             view?.updateItems(updatedItems ?? [])
         }
+
+        onCreateButtonTapped = {[weak self] in
+            guard let self else { return }
+            router?.navigateToDetails()
+        }
     }
 }
 
-extension TasksPresenter: TasksInteractorOutput {
+extension TasksListPresenter: TasksListViewOutput {
     func viewLoaded() {
         interactor?.fetchTasksList{[weak self] result in
             guard let self else { return }
@@ -47,4 +53,8 @@ extension TasksPresenter: TasksInteractorOutput {
             }
         }
     }
+}
+
+extension TasksListPresenter: TasksListInteractorOutput {
+
 }

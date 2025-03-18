@@ -1,5 +1,5 @@
 //
-//  TasksInteractorOutput.swift
+//  TasksListViewOutput.swift
 //  ToDo List
 //
 //  Created by Глеб Капустин on 14.03.2025.
@@ -7,7 +7,8 @@
 
 import Foundation
 
-protocol TasksInteractorOutput: AnyObject {
+protocol TasksListViewOutput {
     var didSelectCell: ((TodoEntity) -> ())? { get }
+    var onCreateButtonTapped: (() -> ())? { get }
     func viewLoaded()
 }

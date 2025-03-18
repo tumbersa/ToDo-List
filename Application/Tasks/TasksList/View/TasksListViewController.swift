@@ -41,6 +41,7 @@ final class TasksListViewController: UIViewController {
         let createButton = UIButton()
         createButton.setImage(UIImage(resource: .todoCreate), for: .normal)
         createButton.translatesAutoresizingMaskIntoConstraints = false
+        createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
         return createButton
     }()
 
@@ -60,7 +61,7 @@ final class TasksListViewController: UIViewController {
         return searchController
     }()
 
-    var output: TasksInteractorOutput?
+    var output: TasksListViewOutput?
 
     var didSelectCell: ((TodoEntity) -> ())?
 
@@ -123,6 +124,10 @@ private extension TasksListViewController {
         ])
     }
 
+    @objc func createButtonTapped() {
+        output?.onCreateButtonTapped?()
+    }
+
 }
 
 extension TasksListViewController: TasksListViewInput {
@@ -143,5 +148,4 @@ extension TasksListViewController: TasksListViewInput {
 }
 
 extension TasksListViewController: TasksListAdapterOutput {
-
 }

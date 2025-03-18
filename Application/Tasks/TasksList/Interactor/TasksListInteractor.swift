@@ -1,5 +1,5 @@
 //
-//  TasksInteractor.swift
+//  TasksListInteractor.swift
 //  ToDo List
 //
 //  Created by Глеб Капустин on 14.03.2025.
@@ -7,12 +7,12 @@
 
 import Foundation
 
-final class TasksInteractor<Store: IStore> where Store.Entity == TodoEntity {
+final class TasksListInteractor<Store: IStore> where Store.Entity == TodoEntity {
 
     private let networkService: INetworkService
     private let todoStore: Store
 
-    weak var output: TasksInteractorOutput?
+    weak var output: TasksListInteractorOutput?
 
     init(networkService: INetworkService, todoStore: Store) {
         self.networkService = networkService
@@ -21,7 +21,7 @@ final class TasksInteractor<Store: IStore> where Store.Entity == TodoEntity {
 
 }
 
-extension TasksInteractor: TasksInteractorInput {
+extension TasksListInteractor: TasksListInteractorInput {
 
     func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ()) {
         if !UserDefaults.standard.bool(forKey: Constants.firstSetup) {
