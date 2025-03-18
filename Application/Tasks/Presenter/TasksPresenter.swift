@@ -8,11 +8,30 @@
 import Foundation
 
 final class TasksPresenter {
+
+    private var tasksList: [TodoEntity] = []
+
     weak var view: TasksListViewInput?
     var interactor: TasksInteractorInput?
     var router: TasksRouterInput?
+    var didSelectCell: ((TodoEntity) -> ())?
 
-    private var tasksList: [TodoEntity] = []
+    init() {
+        didSelectCell = { [weak self] entity in
+            guard let self else { return }
+            let newEntity: TodoEntity = .init(
+                id: entity.id,
+                title: entity.title,
+                description: entity.description,
+                date: entity.date,
+                completed: !entity.completed
+            )
+
+            interactor?.update(entity: newEntity)
+            let updatedItems = interactor?.getTasksList()
+            view?.updateItems(updatedItems ?? [])
+        }
+    }
 }
 
 extension TasksPresenter: TasksInteractorOutput {

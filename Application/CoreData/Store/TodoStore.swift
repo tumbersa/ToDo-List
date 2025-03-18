@@ -12,6 +12,7 @@ protocol IStore {
     associatedtype Entity
     var entities: [Entity] { get }
     func addEntity(_ entity: Entity)
+    func updateEntity(_ entity: Entity)
 }
 
 final class TodoStore: IStore {
@@ -49,6 +50,24 @@ final class TodoStore: IStore {
         todoCDEntity.date = todo.date
         todoCDEntity.completed = todo.completed
         saveContext()
+    }
+
+    func updateEntity(_ todo: TodoEntity) {
+        let request = TodoCDEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", todo.id as CVarArg)
+
+        do {
+            let results = try context.fetch(request)
+            if let existingTodo = results.first {
+                existingTodo.title = todo.title
+                existingTodo.note = todo.description
+                existingTodo.date = todo.date
+                existingTodo.completed = todo.completed
+                saveContext()
+            }
+        } catch {
+            debugPrint("Failed to update entity: \(error)")
+        }
     }
 
 }

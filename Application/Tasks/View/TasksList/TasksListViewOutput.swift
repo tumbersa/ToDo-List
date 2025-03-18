@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TasksListViewOutput {
-    
+    var didSelectCell: ((TodoEntity) -> ())? { get }
 }

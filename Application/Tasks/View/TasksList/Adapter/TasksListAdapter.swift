@@ -21,6 +21,9 @@ final class TasksListAdapter: NSObject {
     private let concurrentQueue = DispatchQueue(label: "com.ToDo_List.tasksListConcurrentQueue", attributes: .concurrent)
     private var searchSerialQueue = DispatchQueue(label: "com.ToDo_List.tasksListSearchSerialQueue")
     private var _items: [TodoEntity] = []
+    private var currentItems: [TodoEntity] {
+        filteredItems.isEmpty ? items : filteredItems
+    }
 
     private var items: [TodoEntity] {
         get {
@@ -42,8 +45,7 @@ final class TasksListAdapter: NSObject {
             cellProvider: { [weak self] tableView, indexPath, itemIdentifier in
                 let cell = tableView.reuse(TasksListTableViewCell.self, indexPath)
                 guard let self else { return cell }
-                let items = filteredItems.isEmpty ? items : filteredItems
-                let isLast = indexPath.row == items.count - 1
+                let isLast = indexPath.row == currentItems.count - 1
                 cell.confugure(with: itemIdentifier, isLast: isLast)
                 return cell
             })
@@ -106,9 +108,7 @@ extension TasksListAdapter: UISearchResultsUpdating {
 extension TasksListAdapter: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let items = filteredItems.isEmpty ? items : filteredItems
-        // TODO: - update via Core Data
-        items[indexPath.row]
+        output?.didSelectCell?(currentItems[indexPath.row])
     }
 
 }
@@ -118,6 +118,20 @@ extension TasksListAdapter: TasksListAdapterInput {
     func configure(with items: [TodoEntity]) {
         self.items = items
         updateData(on: items)
+    }
+
+    func update(items: [TodoEntity]) {
+        self.items = self.items.map { currentItem in
+            items.first(where: { $0.id == currentItem.id }) ?? currentItem
+        }
+
+        if !filteredItems.isEmpty {
+            filteredItems = filteredItems.map { currentItem in
+                items.first(where: { $0.id == currentItem.id }) ?? currentItem
+            }
+        }
+
+        updateData(on: currentItems)
     }
 
 }

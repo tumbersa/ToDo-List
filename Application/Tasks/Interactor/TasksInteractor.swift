@@ -46,4 +46,12 @@ extension TasksInteractor: TasksInteractorInput {
         }
     }
 
+    func update(entity: TodoEntity) {
+        todoStore.updateEntity(entity)
+    }
+
+    func getTasksList() -> [TodoEntity] {
+        todoStore.entities
+    }
+
 }

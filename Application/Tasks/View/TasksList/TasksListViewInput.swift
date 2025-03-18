@@ -9,4 +9,5 @@ import Foundation
 
 protocol TasksListViewInput: AnyObject {
     func setupInitialState(_ tasksList: [TodoEntity])
+    func updateItems(_ tasksList: [TodoEntity])
 }

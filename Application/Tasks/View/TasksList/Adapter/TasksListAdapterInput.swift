@@ -9,4 +9,5 @@ import Foundation
 
 protocol TasksListAdapterInput {
     func configure(with items: [TodoEntity])
+    func update(items: [TodoEntity])
 }

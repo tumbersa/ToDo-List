@@ -8,5 +8,7 @@
 import Foundation
 
 protocol TasksInteractorInput {
+    func getTasksList() -> [TodoEntity]
     func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ())
+    func update(entity: TodoEntity)
 }

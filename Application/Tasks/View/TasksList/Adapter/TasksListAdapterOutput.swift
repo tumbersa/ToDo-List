@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TasksListAdapterOutput: AnyObject {
-    
+    var didSelectCell: ((TodoEntity) -> ())? { get }
 }

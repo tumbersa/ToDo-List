@@ -36,11 +36,15 @@ final class TasksListViewController: UIViewController {
 
     var output: TasksInteractorOutput?
 
+    var didSelectCell: ((TodoEntity) -> ())?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        didSelectCell = output?.didSelectCell
         output?.viewLoaded()
         configureAppearance()
+
     }
 
 }
@@ -61,6 +65,10 @@ extension TasksListViewController: TasksListViewInput {
     func setupInitialState(_ tasksList: [TodoEntity]) {
         adapter = TasksListAdapter(output: self, tableView: tableView, searchController: searchController)
         adapter?.configure(with: tasksList)
+    }
+
+    func updateItems(_ tasksList: [TodoEntity]) {
+        adapter?.update(items: tasksList)
     }
 
 }

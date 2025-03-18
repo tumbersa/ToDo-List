@@ -8,5 +8,6 @@
 import Foundation
 
 protocol TasksInteractorOutput: AnyObject {
+    var didSelectCell: ((TodoEntity) -> ())? { get }
     func viewLoaded()
 }
