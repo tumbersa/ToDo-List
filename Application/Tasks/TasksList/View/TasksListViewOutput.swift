@@ -10,5 +10,7 @@ import Foundation
 protocol TasksListViewOutput {
     var didSelectCell: ((TodoEntity) -> ())? { get }
     var onCreateButtonTapped: (() -> ())? { get }
+    var onEditItem: ((TodoEntity) -> ())? { get }
+    var onDeleteItem: ((TodoEntity) -> ())? { get }
     func viewLoaded()
 }

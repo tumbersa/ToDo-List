@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TasksListRouterInput {
-    func navigateToDetails()
+    func navigateToDetails(detailsModuleOutput: TasksDetailsPresenterOutput, mode: TasksDetailsModuleMode, item: TodoEntity?)
 }

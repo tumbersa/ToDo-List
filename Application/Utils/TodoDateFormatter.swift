@@ -16,4 +16,9 @@ enum TodoDateFormatter {
         return dateFormatter.string(from: date)
     }
 
+    static func date(from string: String) -> Date? {
+        dateFormatter.dateFormat = "dd/MM/yy"
+        return dateFormatter.date(from: string)
+    }
+
 }

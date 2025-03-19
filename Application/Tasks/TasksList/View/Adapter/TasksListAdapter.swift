@@ -79,6 +79,33 @@ private extension TasksListAdapter {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 
+    func previewViewController(for item: TodoEntity) -> UIViewController {
+        let previewController = UIViewController()
+        previewController.view.backgroundColor = UIColor(resource: .todoGray)
+        for cell in tableView.visibleCells {
+            if let cell = cell as? TasksListTableViewCell, item.id == cell.model?.id {
+                previewController.preferredContentSize = cell.contentView.frame.size
+            }
+        }
+
+        let previewView = TasksListPreviewView(
+            title: item.title,
+            description: item.description,
+            date: TodoDateFormatter.formatted(date: item.date)
+        )
+        previewView.translatesAutoresizingMaskIntoConstraints = false
+        previewController.view.addSubview(previewView)
+
+        NSLayoutConstraint.activate([
+            previewView.topAnchor.constraint(equalTo: previewController.view.topAnchor),
+            previewView.bottomAnchor.constraint(equalTo: previewController.view.bottomAnchor),
+            previewView.leadingAnchor.constraint(equalTo: previewController.view.leadingAnchor),
+            previewView.trailingAnchor.constraint(equalTo: previewController.view.trailingAnchor)
+        ])
+
+        return previewController
+    }
+
 }
 
 extension TasksListAdapter: UISearchResultsUpdating {
@@ -111,6 +138,26 @@ extension TasksListAdapter: UITableViewDelegate {
         output?.didSelectCell?(currentItems[indexPath.row])
     }
 
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let item = currentItems[indexPath.row]
+
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: { [weak self] in
+            return self?.previewViewController(for: item)
+        }) { suggestedActions in
+            let editAction = UIAction(title: "Редактировать", image: UIImage(resource: .todoPencil)) { [weak self] _ in
+                self?.output?.onEditItem?(item)
+            }
+            let shareAction = UIAction(title: "Поделиться", image: UIImage(resource: .todoSquareArrow)) { [weak self] _ in
+                self?.output?.onShareItem?(item)
+            }
+            let deleteAction = UIAction(title: "Удалить", image: UIImage(resource: .todoTrash), attributes: .destructive) { [weak self] _ in
+                self?.output?.onDeleteItem?(item)
+            }
+
+            return UIMenu(title: "", children: [editAction, shareAction, deleteAction])
+        }
+    }
+
 }
 
 extension TasksListAdapter: TasksListAdapterInput {
@@ -135,3 +182,5 @@ extension TasksListAdapter: TasksListAdapterInput {
     }
 
 }
+
+

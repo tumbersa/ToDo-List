@@ -7,4 +7,7 @@
 
 import Foundation
 
-protocol TasksDetailsPresenterOutput {}
+protocol TasksDetailsPresenterOutput: AnyObject {
+    func updateTask(entity: TodoEntity)
+    func createTask(entity: TodoEntity)
+}

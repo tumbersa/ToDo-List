@@ -7,4 +7,6 @@
 
 import Foundation
 
-protocol TasksDetailsViewInput: AnyObject {}
+protocol TasksDetailsViewInput: AnyObject {
+    func setupInitialState(_ entity: TodoEntity)
+}

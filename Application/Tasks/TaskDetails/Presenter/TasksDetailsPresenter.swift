@@ -7,14 +7,43 @@
 
 import Foundation
 
-final class TasksDetailsPresenter {
+final class TasksDetailsPresenter: TasksDetailsPresenterInput {
+
+    private let mode: TasksDetailsModuleMode
+    private let entity: TodoEntity?
+
+    weak var output: TasksDetailsPresenterOutput?
+    var onUpdateTask: ((TodoEntity) -> ())?
+    var viewWillDisappear: ((TodoEntity) -> ())?
 
     weak var view: TasksDetailsViewInput?
     var interactor: TasksDetailsInteractorInput?
     var router: TasksDetailsRouterInput?
 
+    init(mode: TasksDetailsModuleMode, entity: TodoEntity?) {
+        self.mode = mode
+        self.entity = entity
+
+        viewWillDisappear = {[weak self] entity in
+            guard let self else { return }
+            switch mode {
+                case .create:
+                    output?.createTask(entity: entity)
+                case .edit:
+                    output?.updateTask(entity: entity)
+            }
+        }
+    }
 }
 
 extension TasksDetailsPresenter: TasksDetailsInteractorOutput {}
 
-extension TasksDetailsPresenter: TasksDetailsViewOutput {}
+extension TasksDetailsPresenter: TasksDetailsViewOutput {
+
+    func viewLoaded() {
+        if let entity {
+            view?.setupInitialState(entity)
+        }
+    }
+
+}

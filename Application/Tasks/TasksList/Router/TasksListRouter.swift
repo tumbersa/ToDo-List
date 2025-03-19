@@ -8,11 +8,13 @@
 import Foundation
 import UIKit
 
-final class TasksListRouter: TasksListRouterInput {
+final class TasksListRouter: TasksListRouterInput  {
+
     weak var view: UINavigationController?
 
-    func navigateToDetails() {
-        let detailsViewController = TasksDetailsModuleBuilder.build()
+    func navigateToDetails(detailsModuleOutput: TasksDetailsPresenterOutput, mode: TasksDetailsModuleMode, item: TodoEntity?) {
+        var (detailsViewController, detailsPresenter) = TasksDetailsModuleBuilder.build(mode: mode, entity: item)
+        detailsPresenter.output = detailsModuleOutput
         view?.pushViewController(detailsViewController, animated: true)
     }
 }

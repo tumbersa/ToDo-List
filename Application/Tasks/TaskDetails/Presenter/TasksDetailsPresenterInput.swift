@@ -7,4 +7,6 @@
 
 import Foundation
 
-protocol TasksDetailsPresenterInput {}
+protocol TasksDetailsPresenterInput {
+    var output: TasksDetailsPresenterOutput? { get set }
+}

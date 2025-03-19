@@ -9,4 +9,7 @@ import Foundation
 
 protocol TasksListAdapterOutput: AnyObject {
     var didSelectCell: ((TodoEntity) -> ())? { get }
+    var onEditItem: ((TodoEntity) -> ())? { get }
+    var onShareItem: ((TodoEntity) -> ())? { get }
+    var onDeleteItem: ((TodoEntity) -> ())? { get }
 }

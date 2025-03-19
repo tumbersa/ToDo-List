@@ -49,6 +49,8 @@ final class TasksListTableViewCell: UITableViewCell {
         return view
     }()
 
+    var model: TodoEntity?
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureAppearance()
@@ -59,7 +61,14 @@ final class TasksListTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        model = nil
+    }
+
     func confugure(with model: TodoEntity, isLast: Bool) {
+        self.model = model
+
         checkmarkImageView.image = model.completed ?
             .init(resource: .todoCheckmark) :
             .init(resource: .todoCircle)
@@ -87,7 +96,7 @@ final class TasksListTableViewCell: UITableViewCell {
 private extension TasksListTableViewCell {
 
     func configureAppearance() {
-        backgroundColor = .clear
+        backgroundColor = .label
         selectionStyle = .none
     }
 

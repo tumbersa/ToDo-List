@@ -7,18 +7,11 @@
 
 import Foundation
 
-final class TasksDetailsInteractor<Store: IStore> where Store.Entity == TodoEntity {
-
-    private let todoStore: Store
+final class TasksDetailsInteractor {
 
     weak var output: TasksDetailsInteractorOutput?
-
-    init(todoStore: Store) {
-        self.todoStore = todoStore
-    }
 
 }
 
 extension TasksDetailsInteractor: TasksDetailsInteractorInput {
-
 }

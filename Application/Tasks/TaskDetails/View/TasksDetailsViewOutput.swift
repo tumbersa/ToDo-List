@@ -7,4 +7,7 @@
 
 import Foundation
 
-protocol TasksDetailsViewOutput {}
+protocol TasksDetailsViewOutput {
+    func viewLoaded()
+    var viewWillDisappear: ((TodoEntity) -> ())? { get }
+}

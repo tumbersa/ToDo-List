@@ -8,11 +8,16 @@
 import Foundation
 import UIKit
 
+enum TasksDetailsModuleMode {
+    case create
+    case edit
+}
+
 enum TasksDetailsModuleBuilder {
-    static func build() -> UIViewController {
+    static func build(mode: TasksDetailsModuleMode, entity: TodoEntity?) -> (UIViewController, TasksDetailsPresenterInput)  {
         let viewController = TasksDetailsViewController()
-        let interactor = TasksDetailsInteractor(todoStore: TodoStore.shared)
-        let presenter = TasksDetailsPresenter()
+        let interactor = TasksDetailsInteractor()
+        let presenter = TasksDetailsPresenter(mode: mode, entity: entity)
         let router = TasksDetailsRouter()
 
         viewController.output = presenter
@@ -22,6 +27,6 @@ enum TasksDetailsModuleBuilder {
         presenter.interactor = interactor
         interactor.output = presenter
 
-        return viewController
+        return (viewController, presenter)
     }
 }

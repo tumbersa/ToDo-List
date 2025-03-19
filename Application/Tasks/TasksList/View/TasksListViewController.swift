@@ -64,13 +64,31 @@ final class TasksListViewController: UIViewController {
     var output: TasksListViewOutput?
 
     var didSelectCell: ((TodoEntity) -> ())?
+    var onEditItem: ((TodoEntity) -> ())?
+    // TODO: - Share Item
+    var onShareItem: ((TodoEntity) -> ())?
+    var onDeleteItem: ((TodoEntity) -> ())?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         didSelectCell = output?.didSelectCell
+        onEditItem = output?.onEditItem
+        onDeleteItem = output?.onDeleteItem
         output?.viewLoaded()
         configureAppearance()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        let bottomInset = bottomContainerView.frame.height
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: bottomInset, right: 0)
+        tableView.scrollIndicatorInsets = tableView.contentInset
     }
 
 }
@@ -79,8 +97,9 @@ private extension TasksListViewController {
 
     func configureAppearance() {
         title = "Задачи"
-        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationBar.tintColor = UIColor(resource: .todoYellow)
         navigationController?.navigationBar.barStyle = .black
+        navigationItem.backButtonTitle = "Назад"
         view.backgroundColor = .label
         layoutUI()
     }
@@ -147,5 +166,4 @@ extension TasksListViewController: TasksListViewInput {
 
 }
 
-extension TasksListViewController: TasksListAdapterOutput {
-}
+extension TasksListViewController: TasksListAdapterOutput {}
