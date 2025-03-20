@@ -54,4 +54,11 @@ extension TasksListInteractor: TasksListInteractorInput {
         todoStore.entities
     }
 
+    func delete(entity: TodoEntity) {
+        todoStore.delete(entity: entity)
+    }
+
+    func add(entity: TodoEntity) {
+        todoStore.addEntity(entity)
+    }
 }

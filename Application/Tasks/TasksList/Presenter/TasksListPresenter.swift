@@ -30,7 +30,8 @@ extension TasksListPresenter: TasksListViewOutput {
     func setup() {
         didSelectCell = { [weak self] entity in
             guard let self else { return }
-            let newEntity: TodoEntity = .init(
+
+            let newEntity = TodoEntity(
                 id: entity.id,
                 title: entity.title,
                 description: entity.description,
@@ -38,9 +39,17 @@ extension TasksListPresenter: TasksListViewOutput {
                 completed: !entity.completed
             )
 
-            interactor?.update(entity: newEntity)
-            let updatedItems = interactor?.getTasksList()
-            view?.updateItems(updatedItems ?? [])
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else { return }
+
+                self.interactor?.update(entity: newEntity)
+                let updatedItems = self.interactor?.getTasksList()
+
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    self.view?.updateItems(updatedItems ?? [])
+                }
+            }
         }
 
         onCreateButtonTapped = { [weak self] in
@@ -54,7 +63,13 @@ extension TasksListPresenter: TasksListViewOutput {
         }
 
         onDeleteItem = { [weak self] item in
-            print(item)
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                self?.interactor?.delete(entity: item)
+                let newItems = self?.interactor?.getTasksList()
+                DispatchQueue.main.async { [weak self] in
+                    self?.view?.updateItems(newItems ?? [])
+                }
+            }
         }
     }
 
@@ -79,11 +94,28 @@ extension TasksListPresenter: TasksListInteractorOutput {
 extension TasksListPresenter: TasksDetailsPresenterOutput {
 
     func createTask(entity: TodoEntity) {
-        print(entity)
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.interactor?.add(entity: entity)
+            let newItems = self?.interactor?.getTasksList()
+            DispatchQueue.main.async { [weak self] in
+                self?.view?.updateItems(newItems ?? [])
+            }
+        }
+
     }
 
     func updateTask(entity: TodoEntity) {
-        print(entity)
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+
+            self.interactor?.update(entity: entity)
+            let updatedItems = self.interactor?.getTasksList()
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.view?.updateItems(updatedItems ?? [])
+            }
+        }
     }
 
 }

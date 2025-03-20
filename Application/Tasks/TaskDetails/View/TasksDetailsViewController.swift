@@ -139,6 +139,7 @@ extension TasksDetailsViewController: UITextViewDelegate {
 extension TasksDetailsViewController: TasksDetailsViewInput {
 
     func setupInitialState(_ entity: TodoEntity) {
+        self.model = entity
         titleTextField.text = entity.title
         descriptionTextView.text = entity.description
         dateLabel.text = TodoDateFormatter.formatted(date: entity.date)

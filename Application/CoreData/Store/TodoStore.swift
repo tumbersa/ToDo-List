@@ -13,6 +13,7 @@ protocol IStore {
     var entities: [Entity] { get }
     func addEntity(_ entity: Entity)
     func updateEntity(_ entity: Entity)
+    func delete(entity: TodoEntity)
 }
 
 final class TodoStore: IStore {
@@ -23,6 +24,8 @@ final class TodoStore: IStore {
     static let shared: TodoStore = TodoStore()
     var entities: [TodoEntity] {
         let request = TodoCDEntity.fetchRequest()
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        request.sortDescriptors = [sortDescriptor]
         let objects: [TodoCDEntity] = (try? context.fetch(request)) ?? []
         var todo: [TodoEntity] = []
         objects.forEach { object in
@@ -71,12 +74,29 @@ final class TodoStore: IStore {
         }
     }
 
+    func delete(entity: TodoEntity) {
+        let request = TodoCDEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", entity.id as CVarArg)
+
+        do {
+            let results = try self.context.fetch(request)
+            if let existingTodo = results.first {
+                self.context.delete(existingTodo)
+                self.saveContext()
+            }
+        } catch {
+            debugPrint("Failed to delete entity: \(error)")
+        }
+    }
+
 }
 
 private extension TodoStore {
 
     func saveContext() {
-        (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+        DispatchQueue.main.async {
+            (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+        }
     }
 
 }

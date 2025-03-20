@@ -167,15 +167,39 @@ extension TasksListAdapter: TasksListAdapterInput {
         updateData(on: items)
     }
 
+    func viewWillAppear() {
+        searchController.searchBar.text = ""
+        searchController.isActive = false
+        searchController.searchBar.resignFirstResponder()
+        filteredItems.removeAll()
+        updateData(on: currentItems)
+    }
+
     func update(items: [TodoEntity]) {
+        guard !filteredItems.isEmpty else {
+            self.items = items
+            updateData(on: currentItems)
+            return
+        }
+
+        // Удаление
+        let updatedItems = self.items.filter { item in
+            items.contains { $0.id == item.id }
+        }
+        self.items = updatedItems
+
+        let updatedFilteredItems = filteredItems.filter { item in
+            items.contains { $0.id == item.id }
+        }
+        filteredItems = updatedFilteredItems
+
+        // Обновление состояния isSelected
         self.items = self.items.map { currentItem in
             items.first(where: { $0.id == currentItem.id }) ?? currentItem
         }
 
-        if !filteredItems.isEmpty {
-            filteredItems = filteredItems.map { currentItem in
-                items.first(where: { $0.id == currentItem.id }) ?? currentItem
-            }
+        filteredItems = filteredItems.map { currentItem in
+            items.first(where: { $0.id == currentItem.id }) ?? currentItem
         }
 
         updateData(on: currentItems)
