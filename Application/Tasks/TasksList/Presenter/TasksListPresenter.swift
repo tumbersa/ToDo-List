@@ -81,6 +81,7 @@ extension TasksListPresenter: TasksListViewOutput {
                     tasksList = entity
                     view?.setupInitialState(tasksList)
                 case let .failure(error):
+                    UserDefaults.standard.set(false, forKey: Constants.firstSetup)
                     debugPrint(error)
             }
         }
