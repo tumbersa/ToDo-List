@@ -39,13 +39,13 @@ extension TasksListPresenter: TasksListViewOutput {
                 completed: !entity.completed
             )
 
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            Task { [weak self] in
                 guard let self = self else { return }
 
-                self.interactor?.update(entity: newEntity)
-                let updatedItems = self.interactor?.getTasksList()
+                await self.interactor?.update(entity: newEntity)
+                let updatedItems = await self.interactor?.getTasksList()
 
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
                     guard let self = self else { return }
                     self.view?.updateItems(updatedItems ?? [])
                 }
@@ -63,10 +63,10 @@ extension TasksListPresenter: TasksListViewOutput {
         }
 
         onDeleteItem = { [weak self] item in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                self?.interactor?.delete(entity: item)
-                let newItems = self?.interactor?.getTasksList()
-                DispatchQueue.main.async { [weak self] in
+            Task { [weak self] in
+                await self?.interactor?.delete(entity: item)
+                let newItems = await self?.interactor?.getTasksList()
+                Task { @MainActor [weak self] in
                     self?.view?.updateItems(newItems ?? [])
                 }
             }
@@ -74,15 +74,19 @@ extension TasksListPresenter: TasksListViewOutput {
     }
 
     func viewLoaded() {
-        interactor?.fetchTasksList{[weak self] result in
-            guard let self else { return }
-            switch result {
+        Task {
+            await interactor?.fetchTasksList{ [weak self] result in
+                guard let self else { return }
+                switch result {
                 case let .success(entity):
                     tasksList = entity
                     view?.setupInitialState(tasksList)
                 case let .failure(error):
                     UserDefaults.standard.set(false, forKey: Constants.firstSetup)
+#if DEBUG
                     debugPrint(error)
+#endif
+                }
             }
         }
     }
@@ -95,25 +99,22 @@ extension TasksListPresenter: TasksListInteractorOutput {
 extension TasksListPresenter: TasksDetailsPresenterOutput {
 
     func createTask(entity: TodoEntity) {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            self?.interactor?.add(entity: entity)
-            let newItems = self?.interactor?.getTasksList()
-            DispatchQueue.main.async { [weak self] in
-                self?.view?.updateItems(newItems ?? [])
+        Task {
+            await interactor?.add(entity: entity)
+            let newItems = await interactor?.getTasksList()
+            Task { @MainActor in
+                view?.updateItems(newItems ?? [])
             }
         }
 
     }
 
     func updateTask(entity: TodoEntity) {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
+        Task {
+            await interactor?.update(entity: entity)
+            let updatedItems = await self.interactor?.getTasksList()
 
-            self.interactor?.update(entity: entity)
-            let updatedItems = self.interactor?.getTasksList()
-
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
+            Task { @MainActor in
                 self.view?.updateItems(updatedItems ?? [])
             }
         }

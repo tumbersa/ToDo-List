@@ -18,25 +18,11 @@ final class TasksListAdapter: NSObject {
     private let searchController: UISearchController
 
     private weak var output: TasksListAdapterOutput?
-    private let concurrentQueue = DispatchQueue(label: "com.ToDo_List.tasksListConcurrentQueue", attributes: .concurrent)
-    private var searchSerialQueue = DispatchQueue(label: "com.ToDo_List.tasksListSearchSerialQueue")
-    private var _items: [TodoEntity] = []
     private var currentItems: [TodoEntity] {
         filteredItems.isEmpty ? items : filteredItems
     }
 
-    private var items: [TodoEntity] {
-        get {
-            return concurrentQueue.sync {
-                _items
-            }
-        }
-        set {
-            concurrentQueue.async(flags: .barrier) {
-                self._items = newValue
-            }
-        }
-    }
+    private var items: [TodoEntity] = []
     private var filteredItems: [TodoEntity] = []
 
     private lazy var dataSource: UITableViewDiffableDataSource<Section, TodoEntity> = {
@@ -82,11 +68,13 @@ private extension TasksListAdapter {
     func previewViewController(for item: TodoEntity) -> UIViewController {
         let previewController = UIViewController()
         previewController.view.backgroundColor = UIColor(resource: .todoGray)
-        for cell in tableView.visibleCells {
-            if let cell = cell as? TasksListTableViewCell, item.id == cell.model?.id {
-                previewController.preferredContentSize = cell.contentView.frame.size
+        let cell = tableView.visibleCells.compactMap { cell -> TasksListTableViewCell? in
+            guard let cell = cell as? TasksListTableViewCell, item.id == cell.model?.id else {
+                return nil
             }
-        }
+            return cell
+        }.first
+        previewController.preferredContentSize = cell?.contentView.frame.size ?? .zero
 
         let previewView = TasksListPreviewView(
             title: item.title,
@@ -118,12 +106,10 @@ extension TasksListAdapter: UISearchResultsUpdating {
             return
         }
 
-        searchSerialQueue.async { [weak self] in
-            guard let self = self else { return }
+        Task {
             let filteredItems = self.items.filter { $0.title.lowercased().contains(searchText.lowercased()) }
 
-            DispatchQueue.main.sync { [weak self] in
-                guard let self = self else { return }
+            Task { @MainActor in
                 self.filteredItems = filteredItems
                 self.updateData(on: filteredItems)
             }
@@ -167,42 +153,22 @@ extension TasksListAdapter: TasksListAdapterInput {
         updateData(on: items)
     }
 
-    func viewWillAppear() {
-        searchController.searchBar.text = ""
-        searchController.isActive = false
-        searchController.searchBar.resignFirstResponder()
-        filteredItems.removeAll()
+    func viewDidAppear() {
         updateData(on: currentItems)
     }
 
     func update(items: [TodoEntity]) {
-        guard !filteredItems.isEmpty else {
-            self.items = items
-            updateData(on: currentItems)
-            return
-        }
+        self.items = items
 
-        // Удаление
-        let updatedItems = self.items.filter { item in
-            items.contains { $0.id == item.id }
+        if searchController.isActive,
+           let searchText = searchController.searchBar.text,
+           !searchText.isEmpty {
+            filteredItems = items.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+            updateData(on: filteredItems)
+        } else {
+            filteredItems.removeAll()
+            updateData(on: items)
         }
-        self.items = updatedItems
-
-        let updatedFilteredItems = filteredItems.filter { item in
-            items.contains { $0.id == item.id }
-        }
-        filteredItems = updatedFilteredItems
-
-        // Обновление состояния isSelected
-        self.items = self.items.map { currentItem in
-            items.first(where: { $0.id == currentItem.id }) ?? currentItem
-        }
-
-        filteredItems = filteredItems.map { currentItem in
-            items.first(where: { $0.id == currentItem.id }) ?? currentItem
-        }
-
-        updateData(on: currentItems)
     }
 
 }

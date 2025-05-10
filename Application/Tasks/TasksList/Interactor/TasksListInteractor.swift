@@ -7,14 +7,14 @@
 
 import Foundation
 
-final class TasksListInteractor<Store: IStore> where Store.Entity == TodoEntity {
+final class TasksListInteractor {
 
     private let networkService: INetworkService
-    private let todoStore: Store
+    private let todoStore: CoreDataStorage
 
     weak var output: TasksListInteractorOutput?
 
-    init(networkService: INetworkService, todoStore: Store) {
+    init(networkService: INetworkService, todoStore: CoreDataStorage) {
         self.networkService = networkService
         self.todoStore = todoStore
     }
@@ -23,42 +23,54 @@ final class TasksListInteractor<Store: IStore> where Store.Entity == TodoEntity 
 
 extension TasksListInteractor: TasksListInteractorInput {
 
-    func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ()) {
-        if !UserDefaults.standard.bool(forKey: Constants.firstSetup) {
-            UserDefaults.standard.set(true, forKey: Constants.firstSetup)
-            networkService.obtainTasksListResult { [weak self] result in
-                guard let self else { return }
-                DispatchQueue.main.async { [weak self] in
-                    guard let self else { return }
-                    switch result {
+    func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ()) async {
+        let result: Result<[TodoEntity], Error> = await withCheckedContinuation { continuation in
+            if !UserDefaults.standard.bool(forKey: Constants.firstSetup) {
+                UserDefaults.standard.set(true, forKey: Constants.firstSetup)
+                networkService.obtainTasksListResult { [weak self] result in
+                    guard let self else {
+                        continuation.resume(returning: .failure(NSError(domain: "InteractorDeallocated", code: 0)))
+                        return
+                    }
+                    Task {
+                        switch result {
                         case let .success(entity):
                             for todoEntity in entity.todos {
-                                todoStore.addEntity(todoEntity)
+                                await self.add(entity: todoEntity)
                             }
-                            completion(.success(todoStore.entities))
+                            let todos = await self.todoStore.todoEntities
+                            continuation.resume(returning: .success(todos))
                         case let .failure(error):
-                            completion(.failure(error))
+                            continuation.resume(returning: .failure(error))
+                        }
                     }
                 }
+            } else {
+                Task {
+                    let todos = await self.todoStore.todoEntities
+                    continuation.resume(returning: .success(todos))
+                }
             }
-        } else {
-            completion(.success(todoStore.entities))
+        }
+
+        Task { @MainActor in
+            completion(result)
         }
     }
 
-    func update(entity: TodoEntity) {
-        todoStore.updateEntity(entity)
+    func update(entity: TodoEntity) async {
+        await todoStore.update(entity: entity)
     }
 
-    func getTasksList() -> [TodoEntity] {
-        todoStore.entities
+    func getTasksList() async -> [TodoEntity] {
+        await todoStore.todoEntities
     }
 
-    func delete(entity: TodoEntity) {
-        todoStore.delete(entity: entity)
+    func delete(entity: TodoEntity) async {
+        await todoStore.delete(entity: entity)
     }
 
-    func add(entity: TodoEntity) {
-        todoStore.addEntity(entity)
+    func add(entity: TodoEntity) async {
+        await todoStore.add(entity: entity)
     }
 }

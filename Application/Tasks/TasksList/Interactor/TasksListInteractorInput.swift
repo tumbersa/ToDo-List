@@ -8,9 +8,9 @@
 import Foundation
 
 protocol TasksListInteractorInput {
-    func getTasksList() -> [TodoEntity]
-    func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ())
-    func update(entity: TodoEntity)
-    func delete(entity: TodoEntity)
-    func add(entity: TodoEntity)
+    func getTasksList() async -> [TodoEntity]
+    func fetchTasksList(_ completion: @escaping (Result<[TodoEntity], Error>) -> ()) async
+    func update(entity: TodoEntity) async
+    func delete(entity: TodoEntity) async
+    func add(entity: TodoEntity) async
 }
