@@ -36,13 +36,5 @@ struct TodoEntity: Hashable {
         self.completed = completed
     }
 
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(completed)
-    }
-
-    static func == (lhs: TodoEntity, rhs: TodoEntity) -> Bool {
-        lhs.id == rhs.id && lhs.completed == rhs.completed
-    }
 }
 

@@ -103,6 +103,33 @@ actor CoreDataStorage {
         }
     }
 
+    func clearAllData() {
+        let context = coreDataStack.viewContext
+        coreDataStack.persistentContainer.managedObjectModel.entities.forEach { entity in
+            guard let name = entity.name else { return }
+            
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: name)
+            let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+            deleteRequest.resultType = .resultTypeObjectIDs
+            
+            do {
+                let result = try context.execute(deleteRequest) as? NSBatchDeleteResult
+                if let objectIDs = result?.result as? [NSManagedObjectID] {
+                    let changes = [NSDeletedObjectsKey: objectIDs]
+                    NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context])
+                }
+            } catch {
+                print("Failed to delete entity \(name): \(error)")
+            }
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save context after clearing: \(error)")
+        }
+    }
+
 }
 
 private extension CoreDataStorage {

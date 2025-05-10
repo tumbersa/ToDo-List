@@ -160,8 +160,7 @@ extension TasksListAdapter: TasksListAdapterInput {
     func update(items: [TodoEntity]) {
         self.items = items
 
-        if searchController.isActive,
-           let searchText = searchController.searchBar.text,
+        if let searchText = searchController.searchBar.text,
            !searchText.isEmpty {
             filteredItems = items.filter { $0.title.lowercased().contains(searchText.lowercased()) }
             updateData(on: filteredItems)
